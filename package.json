@@ -1,0 +1,31 @@
+{
+  "name": "wordpress-docker",
+  "description": "A WordPress installation using Docker Compose, Traefik & mkcert.",
+  "version": "1.0.0",
+  "author": {
+    "name": "ArmandPhilippot",
+    "url": "https://www.armandphilippot.com"
+  },
+  "license": "MIT",
+  "icon": "assets/logo.png",
+  "keywords": [
+    "WordPress",
+    "Docker",
+    "Traefik",
+    "mkcert"
+  ],
+  "homepage": "https://github.com/ArmandPhilippot/wordpress-docker#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ArmandPhilippot/wordpress-docker"
+  },
+  "bugs": {
+    "url": "https://github.com/ArmandPhilippot/wordpress-docker/issues"
+  },
+  "scripts": {
+    "version": "auto-changelog -p --template keepachangelog && git add CHANGELOG.md"
+  },
+  "dependencies": {
+    "auto-changelog": "^2.2.1"
+  }
+}
