@@ -1,0 +1,86 @@
+version: "3.8"
+
+services:
+  db:
+    image: mysql:${DWP_MYSQL_VERSION:-5.7}
+    container_name: dwp_db
+    restart: on-failure
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DWP_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${DWP_DB_NAME:-wordpress}
+      MYSQL_USER: ${DWP_DB_USER:-wordpress}
+      MYSQL_PASSWORD: ${DWP_DB_PASSWORD:-wordpress}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - dwp-web
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:${DWP_WORDPRESS_VERSION:-latest}
+    container_name: dwp_wordpress
+    restart: on-failure
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${DWP_DB_NAME:-wordpress}
+      WORDPRESS_DB_USER: ${DWP_DB_USER:-wordpress}
+      WORDPRESS_DB_PASSWORD: ${DWP_DB_PASSWORD:-wordpress}
+      WORDPRESS_TABLE_PREFIX: ${DWP_TABLE_PREFIX:-wp_}
+    working_dir: /var/www/html
+    volumes:
+      - ./wp-content:/var/www/html/wp-content
+      - ./uploads.ini:/user/local/etc/php/conf.d/uploads.ini
+    networks:
+      - dwp-proxy
+      - dwp-web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wordpress.entrypoints=http,https"
+      - "traefik.http.routers.wordpress.rule=Host(`www.${DWP_DOMAIN_NAME}`) || Host(`${DWP_DOMAIN_NAME}`)"
+      - "traefik.http.routers.wordpress.tls=true"
+  pma:
+    depends_on:
+      - db
+    image: phpmyadmin:${DWP_PMA_VERSION:-latest}
+    container_name: dwp_pma
+    restart: on-failure
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: ${DWP_ROOT_PASSWORD:-root}
+    networks:
+      - dwp-proxy
+      - dwp-web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pma.entrypoints=http,https"
+      - "traefik.http.routers.pma.rule=Host(`pma.${DWP_DOMAIN_NAME}`)"
+      - "traefik.http.routers.pma.tls=true"
+  traefik:
+    image: traefik:${DWP_TRAEFIK_VERSION:-2.3.1}
+    container_name: dwp_traefik
+    restart: on-failure
+    ports:
+      - "127.0.0.1:80:80"
+      - "127.0.0.1:443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml
+      - ./traefik/ssl.yml:/etc/traefik/ssl.yml
+      - ./certs:/etc/traefik/certs
+    networks:
+      - dwp-proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.entrypoints=https"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${DWP_DOMAIN_NAME}`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.users=${DWP_TRAEFIK_USER:-admin}:${DWP_TRAEFIK_PASSWORD:-admin}"
+      - "traefik.http.routers.traefik.tls=true"
+volumes:
+  db_data:
+networks:
+  dwp-proxy:
+    name: dwp-proxy
+  dwp-web:
+    name: dwp-web

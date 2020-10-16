@@ -1,0 +1,10 @@
+################################################################
+#
+# Dynamic configuration for Traefik v2.
+#
+################################################################
+
+tls:
+  certificates:
+    - certFile: "/etc/traefik/certs/domain-name.tld.pem"
+      keyFile: "/etc/traefik/certs/domain-name.tld-key.pem"
