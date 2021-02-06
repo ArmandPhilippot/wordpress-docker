@@ -1,7 +1,7 @@
 {
   "name": "wordpress-docker",
   "description": "A WordPress installation using Docker Compose, Traefik & mkcert.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "ArmandPhilippot",
     "url": "https://www.armandphilippot.com"
