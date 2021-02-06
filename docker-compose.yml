@@ -29,7 +29,7 @@ services:
     working_dir: /var/www/html
     volumes:
       - ./wp-content:/var/www/html/wp-content
-      - ./uploads.ini:/user/local/etc/php/conf.d/uploads.ini
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     networks:
       - dwp-proxy
       - dwp-web
